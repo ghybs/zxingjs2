@@ -27,16 +27,21 @@ With no business model, there is no point in fragmenting the libraries.
 - OS convergence is achieved by using Java language (as chosen by ZXing team).
 - However, web application and full online service cannot be achieved easily with Java.
 - If the library were based on JavaScript, everything would be achievable: online service, web application, hybrid application.
-- Current JavaScript libraries are not as complete and at the same time as powerful as ZXing. E.g. quaggaJS is less orientation dependent, but it reads only 1D barcodes. ZXingjs was also promising, but porting stopped at the most popular 1D barcodes.
+- Current JavaScript libraries are not as complete and at the same time as powerful as ZXing. E.g. quaggaJS is less orientation dependent, but it reads only 1D barcodes and is slower. ZXingjs was also promising, but porting stopped at the most popular 1D barcodes.
 
 This is the rationale to attempt a new full port of ZXing to JavaScript.
 
 ### Why not simply continuing the work from ZXingjs?
 
-- ZXingjs uses several dependencies that impact its compactness.
-- Its objective is to mimic as much as possible the Java ZXing version, including classes, interfaces, etc.
-    * This is very good to keep maximum control on the library, and to maintain porting.
-    * However this impacts performance and compactness, especially since most uses are simple and do not need full control.
+It does a brilliant job at porting exactly the Java ZXing structure (interfaces, classes, etc.) despite the differences between Java and JavaScript.
+
+- Advantages:
+    * Keeps exact same public and private API.
+    * Decreases conversion barrier from ZXing to zxingjs.
+    * Facilitates porting or future updates in master library.
+- Drawbacks:
+    * Does not leave room for code and algorithm optimizations, made possible by JavaScript difference and simpler use case.
+    * Requires dependencies to "emulate" Java classes in JavaScript.
 
 
 ## Strategy
@@ -49,13 +54,13 @@ This is the rationale to attempt a new full port of ZXing to JavaScript.
 
 ## Other barcode image processing libraries (related to JavaScript)
 
-- Original ZXing (1D/2D, Java, Apache-2.0): https://github.com/zxing/zxing
+- Original ZXing (1D/2D, Java, Apache-2.0): https://github.com/zxing/zxing (based on luminance binarization)
     * ZXing Emscripten build (1D/2D?, JavaScript, Apache-2.0, forked from ZXing on 30-Nov-2013): https://github.com/kig/zxing-cpp-emscripten
     * jsqrcode (QR, JavaScript, Apache-2.0, no encoding): https://github.com/LazarSoft/jsqrcode
         - HTML5 QR Code Reader (QR, JavaScript jQuery plugin, MIT): https://github.com/dwa012/html5-qrcode
     * zxingjs (1D, JavaScript, Apache 2.0): https://github.com/wojciechszela/zxingjs (several dependencies)
     * phonegap-plugin-barcodescanner (1D/2D, JavaScript wrapper for Cordova, MIT): https://github.com/phonegap/phonegap-plugin-barcodescanner
-- quaggaJS (1D, JavaScript, MIT, parallel Web Workers, any orientation): https://serratus.github.io/quaggaJS/
+- quaggaJS (1D, JavaScript, MIT, parallel Web Workers, any orientation): https://serratus.github.io/quaggaJS/ (uses a first-step locator to achieve orientation independence and multi codes reading, but it is much slower than ZXing)
 - BarcodeReader (1D, JavaScript, MIT): https://github.com/EddieLa/JOB
 - quirc (2D, C, BSD): https://github.com/dlbeer/quirc
     * Quirc.js (2D, JavaScript, BSD): https://github.com/zz85/quirc.js (article: http://www.lab4games.net/zz85/blog/2015/12/03/quirc-js-an-alternative-javascript-qrcode-decoder/)
