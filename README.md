@@ -4,7 +4,9 @@ Yet another port to JavaScript of [ZXing](https://github.com/zxing/zxing) multi-
 Many 1D and/or 2D code image processing libraries exist.
 
 
+
 ## Rationale
+
 
 ### Mobile application target
 
@@ -15,6 +17,7 @@ Mobile application (smartphone) is a big usage:
 - Input data is very likely printed on paper (usage of other storage like RFID and NFC is limited to appropriately organized domains, whereas paper can be printed by anyone) or on a screen.
 
 Since we target mobile usage, we can build a native application (Java in Android, Objective-C in iOS), hybrid application (HTML, CSS and JavaScript with Cordova / PhoneGap / Ionic), or a web application / pure online service.
+
 
 ### Commodity service
 
@@ -31,6 +34,7 @@ With no business model, there is no point in fragmenting the libraries.
 
 This is the rationale to attempt a new full port of ZXing to JavaScript.
 
+
 ### Why not simply continuing the work from ZXingjs?
 
 It does a brilliant job at porting exactly the Java ZXing structure (interfaces, classes, etc.) despite the differences between Java and JavaScript.
@@ -38,10 +42,11 @@ It does a brilliant job at porting exactly the Java ZXing structure (interfaces,
 - Advantages:
     * Keeps exact same public and private API.
     * Decreases conversion barrier from ZXing to zxingjs.
-    * Facilitates porting or future updates in master library.
+    * Facilitates porting of future updates from Java ZXing.
 - Drawbacks:
     * Does not leave room for code and algorithm optimizations, made possible by JavaScript difference and simpler use case.
     * Requires dependencies to "emulate" Java classes in JavaScript.
+
 
 
 ## Strategy
@@ -50,6 +55,7 @@ It does a brilliant job at porting exactly the Java ZXing structure (interfaces,
     * Very wide [browsers support for canvas](http://caniuse.com/#feat=canvas).
     * Pixels RGBA values are already accessible as a `Uint8ClampedArray`.
 - tst
+
 
 
 ## Other barcode image processing libraries (related to JavaScript)
@@ -66,6 +72,8 @@ It does a brilliant job at porting exactly the Java ZXing structure (interfaces,
     * Quirc.js (2D, JavaScript, BSD): https://github.com/zz85/quirc.js (article: http://www.lab4games.net/zz85/blog/2015/12/03/quirc-js-an-alternative-javascript-qrcode-decoder/)
 - WebCodeCamJS (1D/2D, JavaScript, MIT): https://github.com/andrastoth/WebCodeCamJS (wrap of BarcodeReader and jsqrcode)
 - QR Code Scanner and Generator (QR, JavaScript, proprietary): http://codecanyon.net/item/qr-code-scanner-and-generator/7646726
+
+
 
 ## License
 

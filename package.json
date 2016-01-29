@@ -1,0 +1,24 @@
+{
+  "name": "zxingjs2",
+  "version": "0.0.1",
+  "description": "Yet another port to JavaScript of ZXing multi-format 1D/2D barcode image processing library.",
+  "main": "zxingjs2.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ghybs/zxingjs2.git"
+  },
+  "keywords": [
+    "barcode",
+    "qr code",
+    "reader"
+  ],
+  "author": "Boris Seang",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ghybs/zxingjs2/issues"
+  },
+  "homepage": "https://github.com/ghybs/zxingjs2"
+}

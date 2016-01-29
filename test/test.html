@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test ZXingJS2</title>
+    <script src="../zxingjs2-src.js"></script>
+
+    <style>
+        #result {
+            width: 100%;
+            overflow-x: auto;
+            font-size: 50%;
+            font-family: "Courier New";
+        }
+    </style>
+</head>
+<body>
+
+<h1>Test ZXingJS2</h1>
+
+<img id="ean8-1_1" src="img/ean8-1/1.png" />
+<img id="ean8-1_2" src="img/ean8-1/2.png" />
+
+<canvas id="canvas"></canvas>
+
+<p>Results:</p>
+
+<div id="result">
+    <ul id="resultsList"></ul>
+</div>
+
+<script src="test.js"></script>
+
+</body>
+</html>

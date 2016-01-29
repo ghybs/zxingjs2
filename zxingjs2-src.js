@@ -35,15 +35,17 @@ zxing = {
     _clear: function () {
         var imageWidth = this._imageWidth,
             pixelsLuminance = this._pixelsLuminance,
+            bitRow = this._bitRow,
             buckets_nb = this.statics.LUMINANCE_BUCKETS_NB,
             pixelsLuminanceBuckets = this._pixelsLuminanceBuckets,
             i = 0;
 
         for (; i < imageWidth; i += 1) {
             pixelsLuminance[i] = 0;
+            bitRow[i] = 0;
         }
 
-        for (; i < buckets_nb; i += 1) {
+        for (i = 0; i < buckets_nb; i += 1) {
             pixelsLuminanceBuckets[i] = 0;
         }
     },
@@ -62,11 +64,27 @@ zxing = {
             i = 0,
             j = start;
 
+        /*console.log("Image data length: " + data.length);
+        console.log("Canvas height: " + inputRGBA.height + " pixels");
+        console.log("Expected data length: " + inputRGBA.width * 4 * inputRGBA.height);*/
+
+        var test = "", l;
+
         for (; i < imax; i += 1) {
-            // Red + 2 * Green + Blue) / 4.
-            outputPixelsLuminance[i] = (data[j] + 2 * data[j + 1] + data[j + 2]) / 4;
+            // Calculate luminance cheaply, favoring green. Red + 2 * Green + Blue) / 4.
+            l = outputPixelsLuminance[i] = (data[j] + 2 * data[j + 1] + data[j + 2]) / 4;
             j += 4;
+            if (l < 0x40) {
+                test += "#";
+            } else if (l < 0x80) {
+                test += "+";
+            } else if (l < 0xC0) {
+                test += ".";
+            } else {
+                test += " ";
+            }
         }
+        //console.log(test + "/ " + test.length);
 
         return outputPixelsLuminance;
     },
@@ -141,16 +159,19 @@ zxing = {
     },
 
     _getBWRow: function (width, bwThreshold, inputPixelsLuminance, outputBitArray) {
+        // No need to mask 8 bits as inputPixelsLuminance is already a typed Uint8Array.
         var leftPixelLuminance = inputPixelsLuminance[0],
             centerPixelLuminance = inputPixelsLuminance[1],
             x = 1,
-            rightPixelLuminance, averagedLuminance;
+            rightPixelLuminance, contrastedLuminance;
 
         for (; x < width - 1; x += 1) {
             rightPixelLuminance = inputPixelsLuminance[x + 1];
-            averagedLuminance = Math.floor(((centerPixelLuminance * 4) - leftPixelLuminance - rightPixelLuminance) / 2);
+            contrastedLuminance = ((centerPixelLuminance * 4) - leftPixelLuminance - rightPixelLuminance) / 2;
+            //console.log(contrastedLuminance);
 
-            if (averagedLuminance < bwThreshold) {
+            if (contrastedLuminance < bwThreshold) {
+                //console.log("black");
                 outputBitArray.setBit(x);
             }
 
@@ -167,8 +188,66 @@ zxing.oneDReader = {
         SCAN_LINES_NB: 15
     },
 
-    _decode: function () {
-        var rowStepsAboveOrBelow, isAbove, rowNumber;
+    _decode: function (imageData) {
+        var bitRow = zxing._bitRow,
+            pixelsLuminance = zxing._pixelsLuminance,
+            histogramBuckets = zxing._pixelsLuminanceBuckets,
+            width = imageData.width,
+            height = imageData.height,
+            rowNumber = Math.round(height / 2),
+            scanLinesNb = this.statics.SCAN_LINES_NB,
+            rowStep = Math.ceil(height / scanLinesNb / 2),
+            i = 0,
+            isAbove = false,
+            result = {
+                lines: []
+            },
+            bwThreshold, start, stop;
+
+        console.log("canvas width: " + width + " pixels");
+        var b, bmax = zxing.statics.LUMINANCE_BUCKETS_NB, bs;
+
+        for (; i < scanLinesNb; i += 1) {
+            // Scanning from middle out.
+            rowNumber += rowStep * i * (isAbove ? 1 : -1);
+            rowNumber = Math.floor(rowNumber);
+            isAbove = !isAbove;
+            if (rowNumber < 0 || rowNumber >= height) {
+                break;
+            }
+            start = rowNumber * width * 4;
+            stop = start + width * 4;
+
+            // Analyze line (row).
+            zxing._clear();
+            zxing._getRowRGBLuminance(start, stop, imageData, pixelsLuminance);
+            zxing._fillHistogramBuckets(width, pixelsLuminance, histogramBuckets);
+
+            bs = "";
+            for (b = 0; b < bmax; b += 1) {
+                bs += histogramBuckets[b] + ", ";
+            }
+            //console.log("Histogram: " + bs);
+
+            bwThreshold = zxing._estimateBWThreshold(histogramBuckets);
+
+            //console.log("Estimated threshold: " + bwThreshold);
+
+            zxing._getBWRow(width, bwThreshold, pixelsLuminance, bitRow);
+            result.lines.push({
+                "rowNumber": rowNumber
+            });
+            this._decodeRow(bitRow, result.lines[result.lines.length - 1]);
+        }
+
+        return result;
+    },
+
+    _decodeRow: function (bitRow, resultLine) {
+        resultLine.bits = "";
+        for (var i = 0; i < zxing._imageWidth; i += 1) {
+            resultLine.bits += bitRow.getBit(i) ? "#" : " ";
+        }
     }
 };
 
@@ -179,16 +258,40 @@ zxing.BitArray = function (size) {
     this.clear();
 };
 
-zxing.BitArray.prototype.setBit = function (x) {
-    var group = Math.floor(x / 32),
-        remainder = x % 32; // Remainder is as fast as bitwise mask: http://jsperf.com/math-floor-vs-modulo/9
+addToPrototype(zxing.BitArray, {
+    setBit: function (x) {
+        var group = Math.floor(x / 32),
+            remainder = x % 32; // Remainder is as fast as bitwise mask: http://jsperf.com/math-floor-vs-modulo/9
 
-    this._bitGroups[group] |= 1 << remainder;
-};
+        this._bitGroups[group] |= 1 << remainder;
+        //console.log("0b" + dec2bin(this._bitGroups[group]));
+    },
 
-zxing.BitArray.prototype.clear = function () {
-    var groups = this._bitGroups;
-    for (var i = 0; i < groups.length; i += 1) {
-        groups[i] = 0;
+    getBit: function (x) {
+        var group = Math.floor(x / 32),
+            remainder = x % 32, // Remainder is as fast as bitwise mask: http://jsperf.com/math-floor-vs-modulo/9
+            mask = 1 << remainder;
+
+        return (this._bitGroups[group] & mask) !== 0;
+    },
+
+    clear: function () {
+        var groups = this._bitGroups;
+
+        for (var i = 0; i < groups.length; i += 1) {
+            groups[i] = 0;
+        }
     }
-};
+});
+
+function addToPrototype(constructor, methods) {
+    var proto = constructor.prototype;
+
+    for (var name in methods) {
+        proto[name] = methods[name];
+    }
+}
+
+function dec2bin(dec){
+    return dec.toString(2);
+}
