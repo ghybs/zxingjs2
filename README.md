@@ -63,6 +63,7 @@ It does a brilliant job at porting exactly the Java ZXing structure (interfaces,
 - Original ZXing (1D/2D, Java, Apache-2.0): https://github.com/zxing/zxing (based on luminance binarization)
     * ZXing Emscripten build (1D/2D?, JavaScript, Apache-2.0, forked from ZXing on 30-Nov-2013): https://github.com/kig/zxing-cpp-emscripten
     * jsqrcode (QR, JavaScript, Apache-2.0, no encoding): https://github.com/LazarSoft/jsqrcode
+        - zxing (QR, JavaScript, Apache-2.0): https://www.npmjs.com/package/zxing (port to npm of jsqrcode)
         - HTML5 QR Code Reader (QR, JavaScript jQuery plugin, MIT): https://github.com/dwa012/html5-qrcode
     * zxingjs (1D, JavaScript, Apache 2.0): https://github.com/wojciechszela/zxingjs (several dependencies)
     * phonegap-plugin-barcodescanner (1D/2D, JavaScript wrapper for Cordova, MIT): https://github.com/phonegap/phonegap-plugin-barcodescanner
