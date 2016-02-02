@@ -40,14 +40,15 @@ function decode() {
 }
 
 var v = getElById("v"),
-    capturing = false;
+    capturing = false,
+    stream;
 
 elIdAddListener("startCam", "click", function () {
     var n = navigator;
     console.log("trying to start camera");
 
     if (n.mediaDevices.getUserMedia) {
-        n.mediaDevices.getUserMedia({video: { facingMode: "environment"} , audio: false})
+        n.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}, audio: false})
             .then(success)
             .catch(error);
     } else if (n.webkitGetUserMedia) {
@@ -58,6 +59,13 @@ elIdAddListener("startCam", "click", function () {
         n.getUserMedia({video: true, audio: false}, success, error);
     } else {
         console.log("No camera support found");
+    }
+});
+
+elIdAddListener("stopCam", "click", function () {
+    capturing = false;
+    if (stream && stream.stop) {
+        stream.stop();
     }
 });
 
@@ -82,6 +90,7 @@ function captureToCanvas() {
 
 function success(stream) {
     v.src = window.URL.createObjectURL(stream);
+    stream = stream;
     capturing = true;
     console.log("Camera started!");
     setTimeout(captureToCanvas, 500);
