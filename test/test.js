@@ -42,6 +42,18 @@ var v = getElById("v"),
     videoSelect = getElById("videoSource"),
     n = navigator,
     capturing = false,
+    constraints = {
+        video: {
+            mandatory: {
+                maxWidth: 1280,
+                    maxHeight: 720
+            },
+            optional: [{
+                sourceId: true
+            }]
+        },
+        audio: false
+    },
     stream, mediaDevices;
 
 mediaDevices = n.mediaDevices;
@@ -50,10 +62,12 @@ if (mediaDevices && mediaDevices.getUserMedia) {
 } else {
     mediaDevices = n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia;
     if (mediaDevices) {
+        var getUserMedia1 = n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia;
         mediaDevices = {
             getUserMedia: function(c) {
                 return new Promise(function(y, n) {
-                    (n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia).call(n, c, y, n);
+                    getUserMedia1.call(n, c, y, n);
+                    //(n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia).call(n, c, y, n);
                 });
             },
             /*enumerateDevices: function(c) {
@@ -72,6 +86,14 @@ if (mediaDevices && mediaDevices.getUserMedia) {
 if (mediaDevices) {
     mediaDevices.enumerateDevices(gotSources);
 }
+
+var streamSrc = ('srcObject' in HTMLVideoElement.prototype) ?
+    function (video, stream) {
+        video.srcObject = !!stream ? stream : null;
+    } :
+    function (video, stream) {
+        video.src = !!stream ? (window.URL || window.webkitURL).createObjectURL(stream) : new String();
+    };
 
 function gotSources(sourceInfos) {
     var i = 0,
@@ -94,31 +116,51 @@ function gotSources(sourceInfos) {
     }
 }
 
+function init() {
+    constraints = changeConstraints();
+    try {
+        mediaDevices.getUserMedia(constraints).then(success).catch(error);
+    } catch (error) {
+        //options.getUserMediaError(error);
+        console.log("No camera support found");
+        return false;
+    }
+    return true;
+}
+
+function changeConstraints() {
+    if (videoSelect && videoSelect.length !== 0) {
+        switch (videoSelect[videoSelect.selectedIndex].value.toString()) {
+            case 'true':
+                constraints.video.optional = [{
+                    sourceId: true
+                }];
+                break;
+            case 'false':
+                constraints.video = false;
+                break;
+            default:
+                constraints.video.optional = [{
+                    sourceId: videoSelect[videoSelect.selectedIndex].value
+                }];
+                break;
+        }
+    }
+    constraints.audio = false;
+    return constraints;
+}
+
 function start() {
     if (stream) {
         v.pause();
-        v.src = null;
-        if (stream) {
-            var tracks = stream.getTracks();
-            for (var i = 0; i < tracks.length; i++) {
-                tracks[i].stop();
-            }
+        streamSrc(v, null);
+        var tracks = stream.getTracks();
+        for (var i = 0; i < tracks.length; i++) {
+            tracks[i].stop();
         }
     }
-    var videoSource = videoSelect.length ? videoSelect[videoSelect.selectedIndex].value : null;
-    videoSource = videoSource ? {
-        optional: [{
-            sourceId: videoSource
-        }]
-    } : true;
-    var constraints = {
-        audio: false,
-        video: videoSource
-    };
-    if (mediaDevices) {
-        mediaDevices.getUserMedia(constraints).then(success).catch(error);
-    } else {
-        console.log("No camera support found");
+    if (!stream) {
+        init();
     }
 }
 
@@ -155,9 +197,10 @@ function captureToCanvas() {
     }
 }
 
-function success(stream) {
-    v.src = window.URL.createObjectURL(stream);
-    stream = stream;
+function success(streamIn) {
+    stream = streamIn;
+    streamSrc(v, stream);
+    v.play();
     capturing = true;
     console.log("Camera started!");
     setTimeout(captureToCanvas, 500);
