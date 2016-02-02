@@ -40,24 +40,46 @@ function decode() {
 
 var v = getElById("v"),
     videoSelect = getElById("videoSource"),
+    n = navigator,
     capturing = false,
-    stream;
+    stream, mediaDevices;
 
-navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-if (MediaStreamTrack === undefined ||
-    MediaStreamTrack.getSources === undefined) {
-    alert('This browser does not support MediaStreamTrack.\n\nTry Chrome.');
+mediaDevices = n.mediaDevices;
+if (mediaDevices && mediaDevices.getUserMedia) {
+    //mediaDevices = n.mediaDevices;
 } else {
-    MediaStreamTrack.getSources(gotSources);
+    mediaDevices = n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia;
+    if (mediaDevices) {
+        mediaDevices = {
+            getUserMedia: function(c) {
+                return new Promise(function(y, n) {
+                    (navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia).call(navigator, c, y, n);
+                });
+            },
+            enumerateDevices: function(c) {
+                return new Promise(function(c, y, n) {
+                    (MediaStreamTrack.getSources).call(navigator, c, y, n);
+                });
+            }
+        }
+    } else {
+        mediaDevices = null;
+        alert('This browser does not support MediaStreamTrack.\n\nTry Chrome.');
+    }
+}
+
+if (mediaDevices) {
+    mediaDevices.enumerateDevices(gotSources);
 }
 
 function gotSources(sourceInfos) {
-    for (var i = 0; i !== sourceInfos.length; ++i) {
-        var sourceInfo = sourceInfos[i];
-        var option = document.createElement('option');
-        option.value = sourceInfo.id;
+    var i = 0,
+        sourceInfo, option;
+
+    for (; i < sourceInfos.length; i += 1) {
+        sourceInfo = sourceInfos[i];
+        option = document.createElement('option');
+        option.value = sourceInfo.id || sourceInfo.deviceId;
         if (sourceInfo.kind === 'audio') {
             /*option.text = sourceInfo.label || 'microphone ' +
                 (audioSelect.length + 1);
@@ -73,10 +95,16 @@ function gotSources(sourceInfos) {
 
 function start() {
     if (stream) {
+        v.pause();
         v.src = null;
-        stream.stop();
+        if (stream) {
+            var tracks = stream.getTracks();
+            for (var i = 0; i < tracks.length; i++) {
+                tracks[i].stop();
+            }
+        }
     }
-    var videoSource = videoSelect.value;
+    var videoSource = videoSelect[videoSelect.selectedIndex].value;
     var constraints = {
         audio: false,
         video: {
@@ -85,37 +113,24 @@ function start() {
             }]
         }
     };
-    var n = navigator;
-    if (n.mediaDevices.getUserMedia) {
-        n.mediaDevices.getUserMedia(constraints)
-            .then(success)
-            .catch(error);
-    } else if(n.getUserMedia) {
-        n.getUserMedia(constraints, success, error);
+    if (mediaDevices) {
+        mediaDevices.getUserMedia(constraints).then(success).catch(error);
     } else {
         console.log("No camera support found");
     }
 }
 
-elIdAddListener("startCam", "click", function () {
-    var n = navigator;
-    console.log("trying to start camera");
-
-    if (n.mediaDevices.getUserMedia) {
-        n.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}, audio: false})
-            .then(success)
-            .catch(error);
-    } else if(n.getUserMedia) {
-        n.getUserMedia({video: true, audio: false}, success, error);
-    } else {
-        console.log("No camera support found");
-    }
-});
+elIdAddListener("startCam", "click", start);
 
 elIdAddListener("stopCam", "click", function () {
     capturing = false;
-    if (stream && stream.stop) {
-        stream.stop();
+    v.pause();
+    v.src = null;
+    if (stream) {
+        var tracks = stream.getTracks();
+        for (var i = 0; i < tracks.length; i++) {
+            tracks[i].stop();
+        }
     }
 });
 
