@@ -62,20 +62,18 @@ if (mediaDevices && mediaDevices.getUserMedia) {
 } else {
     mediaDevices = n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia;
     if (mediaDevices) {
-        var getUserMedia1 = n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia;
         mediaDevices = {
             getUserMedia: function(c) {
                 return new Promise(function(y, n) {
-                    getUserMedia1.call(n, c, y, n);
-                    //(n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia).call(n, c, y, n);
+                    (n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia).call(n, c, y, n);
                 });
             },
-            /*enumerateDevices: function(c) {
+            enumerateDevices: function(c) {
                 return new Promise(function(c, y, n) {
                     (MediaStreamTrack.getSources).call(n, c, y, n);
                 });
-            }*/
-            enumerateDevices: MediaStreamTrack.getSources
+            }
+            //enumerateDevices: MediaStreamTrack.getSources
         }
     } else {
         mediaDevices = null;
