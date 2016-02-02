@@ -53,14 +53,15 @@ if (mediaDevices && mediaDevices.getUserMedia) {
         mediaDevices = {
             getUserMedia: function(c) {
                 return new Promise(function(y, n) {
-                    (navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia).call(navigator, c, y, n);
+                    (n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia).call(n, c, y, n);
                 });
             },
-            enumerateDevices: function(c) {
+            /*enumerateDevices: function(c) {
                 return new Promise(function(c, y, n) {
-                    (MediaStreamTrack.getSources).call(navigator, c, y, n);
+                    (MediaStreamTrack.getSources).call(n, c, y, n);
                 });
-            }
+            }*/
+            enumerateDevices: MediaStreamTrack.getSources
         }
     } else {
         mediaDevices = null;
@@ -104,14 +105,15 @@ function start() {
             }
         }
     }
-    var videoSource = videoSelect[videoSelect.selectedIndex].value;
+    var videoSource = videoSelect.length ? videoSelect[videoSelect.selectedIndex].value : null;
+    videoSource = videoSource ? {
+        optional: [{
+            sourceId: videoSource
+        }]
+    } : true;
     var constraints = {
         audio: false,
-        video: {
-            optional: [{
-                sourceId: videoSource
-            }]
-        }
+        video: videoSource
     };
     if (mediaDevices) {
         mediaDevices.getUserMedia(constraints).then(success).catch(error);
