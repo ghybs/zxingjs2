@@ -7,7 +7,6 @@ var img = document.getElementById("ean8-1_1"),
 
 canvas.width = width;
 canvas.height = height;
-context.drawImage(img, 0, 0, width, height);
 context.strokeStyle = "#FF0000";
 
 zxing.init(width);
@@ -40,8 +39,63 @@ function decode() {
 }
 
 var v = getElById("v"),
+    videoSelect = getElById("videoSource"),
     capturing = false,
     stream;
+
+navigator.getUserMedia = navigator.getUserMedia ||
+    navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+if (MediaStreamTrack === undefined ||
+    MediaStreamTrack.getSources === undefined) {
+    alert('This browser does not support MediaStreamTrack.\n\nTry Chrome.');
+} else {
+    MediaStreamTrack.getSources(gotSources);
+}
+
+function gotSources(sourceInfos) {
+    for (var i = 0; i !== sourceInfos.length; ++i) {
+        var sourceInfo = sourceInfos[i];
+        var option = document.createElement('option');
+        option.value = sourceInfo.id;
+        if (sourceInfo.kind === 'audio') {
+            /*option.text = sourceInfo.label || 'microphone ' +
+                (audioSelect.length + 1);
+            audioSelect.appendChild(option);*/
+        } else if (sourceInfo.kind === 'video') {
+            option.text = sourceInfo.label || 'camera ' + (videoSelect.length + 1);
+            videoSelect.appendChild(option);
+        } else {
+            console.log('Some other kind of source: ', sourceInfo);
+        }
+    }
+}
+
+function start() {
+    if (stream) {
+        v.src = null;
+        stream.stop();
+    }
+    var videoSource = videoSelect.value;
+    var constraints = {
+        audio: false,
+        video: {
+            optional: [{
+                sourceId: videoSource
+            }]
+        }
+    };
+    var n = navigator;
+    if (n.mediaDevices.getUserMedia) {
+        n.mediaDevices.getUserMedia(constraints)
+            .then(success)
+            .catch(error);
+    } else if(n.getUserMedia) {
+        n.getUserMedia(constraints, success, error);
+    } else {
+        console.log("No camera support found");
+    }
+}
 
 elIdAddListener("startCam", "click", function () {
     var n = navigator;
@@ -51,10 +105,6 @@ elIdAddListener("startCam", "click", function () {
         n.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}, audio: false})
             .then(success)
             .catch(error);
-    } else if (n.webkitGetUserMedia) {
-        n.webkitGetUserMedia({video: true, audio: false}, success, error);
-    } else if(n.mozGetUserMedia) {
-        n.mozGetUserMedia({video: true, audio: false}, success, error);
     } else if(n.getUserMedia) {
         n.getUserMedia({video: true, audio: false}, success, error);
     } else {
