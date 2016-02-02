@@ -183,6 +183,7 @@ function captureToCanvas() {
             context.drawImage(v, 0, 0);
             try {
                 decode();
+                setTimeout(captureToCanvas, 500);
             }
             catch (e) {
                 console.log(e);
