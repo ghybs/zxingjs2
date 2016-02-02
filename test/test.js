@@ -68,12 +68,12 @@ if (mediaDevices && mediaDevices.getUserMedia) {
                     (n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia).call(n, c, y, n);
                 });
             },
-            enumerateDevices: function(c) {
+            /*enumerateDevices: function(c) {
                 return new Promise(function(c, y, n) {
                     (MediaStreamTrack.getSources).call(n, c, y, n);
                 });
-            }
-            //enumerateDevices: MediaStreamTrack.getSources
+            }*/
+            enumerateDevices: MediaStreamTrack.getSources
         }
     } else {
         mediaDevices = null;
