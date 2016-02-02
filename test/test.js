@@ -64,8 +64,8 @@ if (mediaDevices && mediaDevices.getUserMedia) {
     if (mediaDevices) {
         mediaDevices = {
             getUserMedia: function(c) {
-                return new Promise(function(y, n) {
-                    (n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia).call(n, c, y, n);
+                return new Promise(function(y, n2) {
+                    (n.getUserMedia || n.mozGetUserMedia || n.webkitGetUserMedia).call(n, c, y, n2);
                 });
             },
             /*enumerateDevices: function(c) {
