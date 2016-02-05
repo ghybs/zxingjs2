@@ -54,7 +54,7 @@ zxing.oneD.codabar.reader = {
         return this;
     },
 
-    decodeRow: function (rowNumber, bitRow, options) {
+    decodeRow: function (bitRow, options) {
         this._setCounters(bitRow);
 
         var startOffset = this._findStartPattern(),
@@ -149,8 +149,8 @@ zxing.oneD.codabar.reader = {
 
         return {
             text: text,
-            startPoint: [left, rowNumber],
-            endPoint: [runningCount, rowNumber],
+            startPoint: [left],
+            endPoint: [runningCount],
             type: zxing.barcodeFormat.CODABAR
         };
 

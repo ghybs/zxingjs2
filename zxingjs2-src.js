@@ -201,13 +201,11 @@ zxing.oneDReader = {
             rowStep = Math.ceil(height / scanLinesNb / 2),
             i = 0,
             isAbove = false,
-            result = {
-                lines: []
-            },
-            bwThreshold, start, stop;
+            reader = zxing.oneD.codabar.reader,
+            decodeRow3 = reader.decodeRow.bind(reader),
+            bwThreshold, start, stop, result;
 
         console.log("canvas width: " + width + " pixels");
-        var b, bmax = zxing.statics.LUMINANCE_BUCKETS_NB, bs;
 
         for (; i < scanLinesNb; i += 1) {
             // Scanning from middle out.
@@ -225,34 +223,21 @@ zxing.oneDReader = {
             zxing._getRowRGBLuminance(start, stop, imageData, pixelsLuminance);
             zxing._fillHistogramBuckets(width, pixelsLuminance, histogramBuckets);
 
-            bs = "";
-            for (b = 0; b < bmax; b += 1) {
-                bs += histogramBuckets[b] + ", ";
-            }
-            //console.log("Histogram: " + bs);
-
             bwThreshold = zxing._estimateBWThreshold(histogramBuckets);
 
-            //console.log("Estimated threshold: " + bwThreshold);
-
             zxing._getBWRow(width, bwThreshold, pixelsLuminance, bitRow);
-            result.lines.push({
-                "rowNumber": rowNumber
-            });
-            this._decodeRow(rowNumber, bitRow, result.lines[result.lines.length - 1]);
+
+            result = decodeRow3(bitRow);
+            if (result !== -1) {
+                return result;
+            }
         }
 
         return result;
     },
 
-    _decodeRow: function (rowNumber, bitRow, resultLine) {
-        resultLine.bits = "";
-        for (var i = 0; i < zxing._imageWidth; i += 1) {
-            resultLine.bits += bitRow.getBit(i) ? "#" : " ";
-        }
-
-        var result = zxing.oneD.codabar.reader.decodeRow(rowNumber, bitRow);
-        resultLine.result = result;
+    _decodeRow: function (rowNumber, bitRow) {
+        var result = zxing.oneD.codabar.reader.decodeRow(bitRow);
     }
 };
 
