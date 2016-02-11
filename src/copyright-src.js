@@ -1,5 +1,6 @@
 /**
- * Copyright 2016 Boris Seang
+ * ZXingJS2 {VERSION}, a JavaScript port of ZXing multi-format 1D/2D barcode image processing library.
+ * Copyright {YEAR} Boris Seang
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,5 +14,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-zxing.barcodeFormat = {};

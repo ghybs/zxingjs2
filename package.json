@@ -4,7 +4,8 @@
   "description": "Yet another port to JavaScript of ZXing multi-format 1D/2D barcode image processing library.",
   "main": "zxingjs2.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jake test",
+    "build": "jake build"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,10 @@
   "bugs": {
     "url": "https://github.com/ghybs/zxingjs2/issues"
   },
-  "homepage": "https://github.com/ghybs/zxingjs2"
+  "homepage": "https://github.com/ghybs/zxingjs2",
+  "devDependencies": {
+    "eslint": "^1.10.3",
+    "magic-string": "^0.10.2",
+    "uglify-js": "^2.6.1"
+  }
 }

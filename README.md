@@ -13,7 +13,7 @@ Many 1D and/or 2D code image processing libraries exist.
 Mobile application (smartphone) is a big usage:
 
 - Manual input is tedious.
-- Smartphone is almost always readily available.
+- Smartphone is ubiquitous / almost always readily available.
 - Input data is very likely printed on paper (usage of other storage like RFID and NFC is limited to appropriately organized domains, whereas paper can be printed by anyone) or on a screen.
 
 Since we target mobile usage, we can build a native application (Java in Android, Objective-C in iOS), hybrid application (HTML, CSS and JavaScript with Cordova / PhoneGap / Ionic), or a web application / pure online service.
@@ -63,39 +63,43 @@ Let's compare an early implementation of ZXingJS2 with zxingjs, from the perform
 
 We expect the speed difference to highlight the drawbacks of Require.js dynamic modules loading, and the overhead of class emulation.
 
-Firefox:
+quaggaJS configuration: no locator, 0 workers.
 
-| Operation | zxingjs duration (ms) | ZXingJS2 duration (ms) | Factor | Decoded value |
-| :-------- | :-------------------: | :--------------------: | :----: | :------------ |
-| Initialization | 1,091 | 1 | 1,000+ |N/A |
-| Decode `codabar-1/01.png` | 27.7 | 3.9 | 7.1 | `1234567890` |
-| Decode `codabar-1/02.png` | 10.3 | 2.6 | 4.0 | `1234567890` |
-| Decode `codabar-1/03.png` | 8.5 | 2.3 | 3.7 |`294/586` |
-| Decode `codabar-1/04.png` | 3.9 | 0.8 | 4.9 |`123455` |
-| Decode `codabar-1/09.png` | 4.6 | 0.9 | 5.1 | `12345` |
-| Decode `codabar-1/10.png` | 4.3 | 0.8 | 5.4 |`123456` |
-| Decode `codabar-1/11.png` | 4.9 | 0.9 | 5.4 | `3419500` |
-| Decode `codabar-1/12.png` | 16.8 | 3.4 | 4.9 | `31117013206375` |
-| Decode `codabar-1/13.png` | 5.1 | 1.0 | 5.1 | `12345` |
-| Decode `codabar-1/14.png` | 5.2 | 1.1 | 4.7 | `31117013206375` |
-| Decode `codabar-1/15.png` | 6.4 | 0.8 | 8.0 | `123456789012` |
+Desktop Firefox:
 
-Chromium:
+| Operation | zxingjs duration (ms) | ZXingJS2 duration (ms) | Factor | Decoded value | quaggaJS duration (ms) |
+| :-------- | :-------------------: | :--------------------: | :----: | :------------ | :--------------------: |
+| Initialization | 1,091 | 1 | 1,000+ |N/A | 350 |
+| Decode `codabar-1/01.png` | 27.7 | 3.9 | 7.1 | `1234567890` | 6 to 11 |
+| Decode `codabar-1/02.png` | 10.3 | 2.6 | 4.0 | `1234567890` | 4 to 12 |
+| Decode `codabar-1/03.png` | 8.5 | 2.3 | 3.7 |`294/586` | 4 to 8 |
+| Decode `codabar-1/04.png` | 3.9 | 0.8 | 4.9 |`123455` | 1 to 4 |
+| Decode `codabar-1/09.png` | 4.6 | 0.9 | 5.1 | `12345` | 1 to 3 |
+| Decode `codabar-1/10.png` | 4.3 | 0.8 | 5.4 |`123456` | ? |
+| Decode `codabar-1/11.png` | 4.9 | 0.9 | 5.4 | `3419500` | ? |
+| Decode `codabar-1/12.png` | 16.8 | 3.4 | 4.9 | `31117013206375` | ? |
+| Decode `codabar-1/13.png` | 5.1 | 1.0 | 5.1 | `12345` | ? |
+| Decode `codabar-1/14.png` | 5.2 | 1.1 | 4.7 | `31117013206375` | ? |
+| Decode `codabar-1/15.png` | 6.4 | 0.8 | 8.0 | `123456789012` | ? |
 
-| Operation | zxingjs duration (ms) | ZXingJS2 duration (ms) | Factor | Decoded value |
-| :-------- | :-------------------: | :--------------------: | :----: | :------------ |
-| Initialization | 250 | 1 | 250 |N/A |
-| Decode `codabar-1/01.png` | 15.0 | 5.0 | 3.0 | `1234567890` |
-| Decode `codabar-1/02.png` | 8.0 | 2.4 | 3.3 | `1234567890` |
-| Decode `codabar-1/03.png` | 4.5 | 1.5 | 3.0 |`294/586` |
-| Decode `codabar-1/04.png` | 1.9 | 0.4 | 4.8 |`123455` |
-| Decode `codabar-1/09.png` | 2.5 | 0.5 | 5.0 | `12345` |
-| Decode `codabar-1/10.png` | 2.0 | 0.3 | 6.7 |`123456` |
-| Decode `codabar-1/11.png` | 2.5 | 0.3 | 8.3 | `3419500` |
-| Decode `codabar-1/12.png` | 9.5 | 3.0 | 3.1 | `31117013206375` |
-| Decode `codabar-1/13.png` | 2.5 | 0.5 | 5.0 | `12345` |
-| Decode `codabar-1/14.png` | 3.0 | 0.4 | 7.5 | `31117013206375` |
-| Decode `codabar-1/15.png` | 3.5 | 0.6 | 5.8 | `123456789012` |
+Desktop Chromium:
+
+| Operation | zxingjs duration (ms) | ZXingJS2 duration (ms) | Factor | Decoded value | quaggaJS duration (ms) |
+| :-------- | :-------------------: | :--------------------: | :----: | :------------ | :--------------------: |
+| Initialization | 250 | 1 | 250 |N/A | ? |
+| Decode `codabar-1/01.png` | 15.0 | 5.0 | 3.0 | `1234567890` | 5 to 8 |
+| Decode `codabar-1/02.png` | 8.0 | 2.4 | 3.3 | `1234567890` | 4 to 12 |
+| Decode `codabar-1/03.png` | 4.5 | 1.5 | 3.0 |`294/586` | 3 to 6 |
+| Decode `codabar-1/04.png` | 1.9 | 0.4 | 4.8 |`123455` | 1 to 3 |
+| Decode `codabar-1/09.png` | 2.5 | 0.5 | 5.0 | `12345` | 0 to 3 |
+| Decode `codabar-1/10.png` | 2.0 | 0.3 | 6.7 |`123456` | ? |
+| Decode `codabar-1/11.png` | 2.5 | 0.3 | 8.3 | `3419500` | ? |
+| Decode `codabar-1/12.png` | 9.5 | 3.0 | 3.1 | `31117013206375` | ? |
+| Decode `codabar-1/13.png` | 2.5 | 0.5 | 5.0 | `12345` | ? |
+| Decode `codabar-1/14.png` | 3.0 | 0.4 | 7.5 | `31117013206375` | ? |
+| Decode `codabar-1/15.png` | 3.5 | 0.6 | 5.8 | `123456789012` | ? |
+
+If we include the canvas update in ZXingJS2 test, it increases the duration by less than 1 ms.
 
 Pre-loading the modules does not change the initialization time: the measured duration reflects the situation where modules come straight from browser cache.
 
@@ -105,6 +109,8 @@ Conclusions:
 
 - Getting rid of the Require.js scheme saves about 1 second initialization in Firefox, 0.25s in Chromium.
 - Porting to JavaScript without Java class emulation speeds up the processing by a factor of 4 to 8 in Firefox, 3 to 8 in Chromium, at least in the case of 1D Codabar.
+
+Faster processing means support of less performant devices, and for a given device, increased processing rate, hence the ability to process more frames and more opportunities to capture a good image.
 
 ## Other barcode image processing libraries (related to JavaScript)
 

@@ -28,7 +28,7 @@ zxing = {
         this._imageWidth = width;
         this._pixelsLuminance = new Uint8Array(width);
         // Luminance histogram buckets are Uint32, i.e. they can count up to 2**32 - 1 = 4,294,967,295.
-        this._pixelsLuminanceBuckets = new Uint32Array(this.statics.LUMINANCE_BUCKETS_NB);
+        this._luminanceBuckets = new Uint32Array(this.statics.LUMINANCE_BUCKETS_NB);
         this._bitRow = new this.BitArray(width);
     },
 
@@ -38,7 +38,7 @@ zxing = {
         var imageWidth = this._imageWidth,
             pixelsLuminance = this._pixelsLuminance,
             buckets_nb = this.statics.LUMINANCE_BUCKETS_NB,
-            pixelsLuminanceBuckets = this._pixelsLuminanceBuckets,
+            pixelsLuminanceBuckets = this._luminanceBuckets,
             i = 0;
 
         for (; i < imageWidth; i += 1) {
@@ -58,130 +58,6 @@ zxing = {
             height = canvasEl.height;
 
         return context.getImageData(0, 0, width, height);
-    },
-
-    _getRowRGBLuminance: function (start, stop, inputRGBA, outputPixelsLuminance) {
-        var data = inputRGBA.data,
-            imax = (stop - start) / 4,
-            i = 0,
-            j = start;
-
-        /*console.log("Image data length: " + data.length);
-        console.log("Canvas height: " + inputRGBA.height + " pixels");
-        console.log("Expected data length: " + inputRGBA.width * 4 * inputRGBA.height);*/
-
-        var test = "", l;
-
-        for (; i < imax; i += 1) {
-            // Calculate luminance cheaply, favoring green. Red + 2 * Green + Blue) / 4.
-            l = outputPixelsLuminance[i] = (data[j] + 2 * data[j + 1] + data[j + 2]) / 4;
-            j += 4;
-            if (l < 0x40) {
-                test += "#";
-            } else if (l < 0x80) {
-                test += "+";
-            } else if (l < 0xC0) {
-                test += ".";
-            } else {
-                test += " ";
-            }
-        }
-        //console.log(test + "/ " + test.length);
-
-        return outputPixelsLuminance;
-    },
-
-    _estimateBWThreshold: function (buckets) {
-        var bucketsNb = this.statics.LUMINANCE_BUCKETS_NB,
-            peakAx = 0,
-            peakACount = 0,
-            peakBx = 0,
-            peakBScore = 0,
-            x = 0,
-            distanceToPeakAx, score, valleyX;
-
-        // Find highest count bucket (peakA).
-        for (; x < bucketsNb; x += 1) {
-            if (buckets[x] > peakACount) {
-                peakACount = buckets[x];
-                peakAx = x;
-            }
-        }
-
-        // Find next highest count and farthest bucket (peakB).
-        for (x = 0; x < bucketsNb; x += 1) {
-            distanceToPeakAx = x - peakAx;
-            score = buckets[x] * distanceToPeakAx * distanceToPeakAx;
-            if (score > peakBScore) {
-                peakBScore = score;
-                peakBx = x;
-            }
-        }
-
-        // peakAx should be lower than peakBx in order to be the black pixels.
-        if (peakAx > peakBx) {
-            var temp = peakAx;
-            peakAx = peakBx;
-            peakBx = temp;
-            peakACount = buckets[peakAx];
-        }
-
-        // Fail if peakA and peakB are closer than BW_SEPARATION_THRESHOLD.
-        if (peakBx - peakAx < this.statics.BW_SEPARATION_THRESHOLD) {
-            return -1;
-        }
-
-        // Look for B/W threshold as valley of lowest count, very far from peakA (black), far from peakB (white).
-        peakBScore = -1;
-        x = valleyX = peakBx - 1;
-        for (; x > peakAx; x--) {
-            distanceToPeakAx = x - peakAx;
-            score = distanceToPeakAx * distanceToPeakAx * (peakBx - x) * (peakACount - buckets[x]);
-
-            if (score > peakBScore) {
-                peakBScore = score;
-                valleyX = x;
-            }
-        }
-
-        return valleyX << this.statics.LUMINANCE_SHIFT;
-    },
-
-    _fillHistogramBuckets: function (width, inputPixelsLuminance, outputBuckets) {
-        var x = 0,
-            bitShift = this.statics.LUMINANCE_SHIFT,
-            pixel;
-
-        for (; x < width; x += 1) {
-            pixel = inputPixelsLuminance[x];
-            outputBuckets[pixel >> bitShift] += 1;
-        }
-
-        return outputBuckets;
-    },
-
-    _getBWRow: function (width, bwThreshold, inputPixelsLuminance, outputBitArray) {
-        // No need to mask 8 bits as inputPixelsLuminance is already a typed Uint8Array.
-        var leftPixelLuminance = inputPixelsLuminance[0],
-            centerPixelLuminance = inputPixelsLuminance[1],
-            x = 1,
-            rightPixelLuminance, contrastedLuminance;
-
-        for (; x < width - 1; x += 1) {
-            rightPixelLuminance = inputPixelsLuminance[x + 1];
-            contrastedLuminance = ((centerPixelLuminance * 4) - leftPixelLuminance - rightPixelLuminance) / 2;
-            //console.log(contrastedLuminance);
-
-            if (contrastedLuminance < bwThreshold) {
-                //console.log("black");
-                outputBitArray.setBit(x); // 1 for black, 0 for white.
-            }
-
-            leftPixelLuminance = centerPixelLuminance;
-            centerPixelLuminance = rightPixelLuminance;
-        }
-
-        return outputBitArray;
     }
 };
 
@@ -193,7 +69,7 @@ zxing.oneDReader = {
     _decode: function (imageData) {
         var bitRow = zxing._bitRow,
             pixelsLuminance = zxing._pixelsLuminance,
-            histogramBuckets = zxing._pixelsLuminanceBuckets,
+            histogramBuckets = zxing._luminanceBuckets,
             width = imageData.width,
             height = imageData.height,
             rowNumber = Math.round(height / 2),
@@ -220,7 +96,7 @@ zxing.oneDReader = {
 
             // Analyze line (row).
             zxing._clear();
-            zxing._getRowRGBLuminance(start, stop, imageData, pixelsLuminance);
+            zxing.getLuminance(start, stop, imageData, pixelsLuminance);
             zxing._fillHistogramBuckets(width, pixelsLuminance, histogramBuckets);
 
             bwThreshold = zxing._estimateBWThreshold(histogramBuckets);
@@ -240,112 +116,3 @@ zxing.oneDReader = {
         var result = zxing.oneD.codabar.reader.decodeRow(bitRow);
     }
 };
-
-// Typed array to store bits in a compact and fast manner.
-zxing.BitArray = function (size) {
-    this._size = size;
-
-    // Make sure to use an extra Uint if `size` is not a multiple of Uint's size.
-    this._bitGroups = new Uint32Array(Math.floor((size + 31) / 32));
-    this.clear();
-};
-
-addToPrototype(zxing.BitArray, {
-    setBit: function (x) {
-        var group = Math.floor(x / 32),
-            remainder = x % 32; // Remainder is as fast as bitwise mask: http://jsperf.com/math-floor-vs-modulo/9
-
-        this._bitGroups[group] |= 1 << remainder; // Stored from LSb to MSb within a group.
-    },
-
-    getBit: function (x) {
-        var group = Math.floor(x / 32),
-            remainder = x % 32, // Remainder is as fast as bitwise mask (x & 0x1F): http://jsperf.com/math-floor-vs-modulo/9
-            mask = 1 << remainder;
-
-        return (this._bitGroups[group] & mask) !== 0;
-    },
-
-    clear: function () {
-        var groups = this._bitGroups;
-
-        for (var i = 0; i < groups.length; i += 1) {
-            groups[i] = 0;
-        }
-    },
-
-    getSize: function () {
-        return this._size;
-    },
-
-    getNextSet : function (from) {
-        if (from >= this._size) {
-            return this._size;
-        }
-
-        var groupOffset  = Math.floor(from / 32),
-            bitGroups = this._bitGroups,
-            currentGroup = bitGroups[groupOffset],
-            remainder = from % 32,
-            groupMax = bitGroups.length;
-
-        currentGroup &= ~((1 << remainder) - 1);
-        while (currentGroup === 0) {
-            groupOffset += 1;
-            if (groupOffset === groupMax) {
-                return this._size;
-            }
-            currentGroup = bitGroups[groupOffset];
-        }
-
-        var result = (groupOffset * 32) + this._numberOfTrailingZeros(currentGroup);
-
-        // Math.min is faster than conditional assignment and if condition in FF, same in Chrome.
-        // https://jsperf.com/math-min-max-vs-ternary-vs-if
-        return Math.min(this._size, result);
-    },
-
-    getNextUnset: function (from) {
-        if (from >= this._size) {
-            return this._size;
-        }
-
-        var groupOffset = Math.floor(from / 32),
-            bitGroups = this._bitGroups,
-            currentGroup = ~bitGroups[groupOffset],
-            remainder = from % 32,
-            groupMax = bitGroups.length;
-
-        currentGroup &= ~((1 << remainder) - 1);
-        while (currentGroup === 0) {
-            groupOffset += 1;
-            if (groupOffset === groupMax) {
-                return this._size;
-            }
-            currentGroup = ~bitGroups[groupOffset];
-        }
-        var result = (groupOffset * 32) + this._numberOfTrailingZeros(currentGroup);
-        return Math.min(this._size, result);
-    },
-
-    // Utility to quickly determine the number of trailing unset bits in a Uint.
-    _numberOfTrailingZeros: (function () {
-        var lookup = [32, 0, 1, 26, 2, 23, 27, 0, 3, 16, 24, 30, 28, 11, 0, 13, 4, 7, 17, 0, 25, 22, 31, 15, 29, 10, 12, 6, 0, 21, 14, 9, 5, 20, 8, 19, 18];
-
-        return function (Uint) {
-            return lookup[(Uint & -Uint) % 37];
-        };
-    })()
-});
-
-function addToPrototype(constructor, methods) {
-    var proto = constructor.prototype;
-
-    for (var name in methods) {
-        proto[name] = methods[name];
-    }
-}
-
-function dec2bin(dec){
-    return dec.toString(2);
-}

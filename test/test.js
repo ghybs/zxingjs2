@@ -89,6 +89,7 @@ var data1, key, result;
 var perfDecodeStart ;
 for (var i = 0; i < imax; i += 1) {
     for (key in data) {
+        perfDecodeStart = Date.now();
         data1 = data[key];
         img = getElById(key);
         width = img.width;
@@ -97,7 +98,7 @@ for (var i = 0; i < imax; i += 1) {
         canvas.height = height;
         context.drawImage(img, 0, 0, width, height);
 
-        perfDecodeStart = Date.now();
+        //perfDecodeStart = Date.now();
         zxing.init(width);
         result = decodeSimple();
         data1.cumulatedDuration += (Date.now() - perfDecodeStart);
