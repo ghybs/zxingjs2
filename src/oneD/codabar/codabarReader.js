@@ -107,7 +107,7 @@ zxing.oneD.codabar.reader = {
 
         options = options || {};
         // Remove start and end characters, unless required not to.
-        if (!options[zxing.options.RETURN_CODABAR_START_END]) {
+        if (!options[zxing.optionNames.RETURN_CODABAR_START_END]) {
             chars.shift();
             chars.pop();
         }
@@ -346,4 +346,4 @@ zxing.BitArray.prototype.toCounts = function (outputCounts) {
     };
 };
 
-zxing.options.RETURN_CODABAR_START_END = "return_codabar_start_end";
+zxing.optionNames.RETURN_CODABAR_START_END = "return_codabar_start_end";

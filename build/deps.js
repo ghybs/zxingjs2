@@ -4,7 +4,6 @@ var deps = {
         src: [
             'zxing.js',
             'core/util.js',
-            'core/barcodeFormat.js',
             'core/BitArray.js',
             'core/rgbLuminance.js',
             'core/globalHistogramBinarizer.js',

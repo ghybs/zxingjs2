@@ -22,19 +22,20 @@ zxing.read = function (canvas, options) {
         options.height = canvas.height;
     }
 
+    return zxing._read(canvas, options);
+
 };
 
-/*zxing._read = function (canvas, options) {
+zxing._read = function (canvas, options) {
 
-    options = {};
+    console.log(options);
 
-};*/
+};
 
-zxing.reader = {
+zxing.init = function (options) {
 
-    init: function (options) {
+    options = options || {};
 
-        this.pixelsLuminance = this.pixelsLuminance || new Uint8Array(options.width);
-    }
+    zxing.pixelsLuminance = zxing.pixelsLuminance || new Uint8Array(options.width || 600);
 
 };

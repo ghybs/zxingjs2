@@ -2,7 +2,9 @@ var zxing = {
 
     version: "0.0.1",
 
-    options: {}
+    optionNames: {},
+
+    barcodeFormat: {}
 
 };
 
@@ -26,7 +28,7 @@ if (typeof define === "function" && define.amd) {
     module.exports = zxing;
 }
 
-// Define as a global zxing variable, saving the original zxing to restore later if needed
+// Define as a global zxing variable, saving the original zxing to restore later if needed.
 if (typeof window !== "undefined") {
     expose();
 }
