@@ -36,6 +36,7 @@ zxing.init = function (options) {
 
     options = options || {};
 
-    zxing.pixelsLuminance = zxing.pixelsLuminance || new Uint8Array(options.width || 600);
+    zxing._luminanceConverter = zxing.rgbLuminance.init(options.width || 600);
+    zxing._binarizer = zxing.globalHistogramBinarizer.init();
 
 };

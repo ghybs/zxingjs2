@@ -8,6 +8,8 @@ zxing.globalHistogramBinarizer = {
     init: function () {
         // Luminance histogram buckets are Uint32, i.e. they can count up to 2**32 - 1 = 4,294,967,295.
         this._luminanceBuckets = new Uint32Array(this.LUMINANCE_BUCKETS_NB);
+
+        return this;
     },
 
     _estimateBWThreshold: function () {

@@ -2,6 +2,8 @@ zxing.rgbLuminance = {
 
     init: function (pixelsNb) {
         this.pixelsLuminance = new Uint8Array(pixelsNb);
+
+        return this;
     },
 
     getLuminance: function (start, stop, inputRGBA) {
