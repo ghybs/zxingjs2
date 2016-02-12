@@ -8,17 +8,6 @@ var zxing = {
 
 };
 
-function expose() {
-    var oldZxing = window.zxing;
-
-    zxing.noConflict = function () {
-        window.zxing = oldZxing;
-        return this;
-    };
-
-    window.zxing = zxing;
-}
-
 // Define as an AMD module.
 if (typeof define === "function" && define.amd) {
     define(zxing);
@@ -29,6 +18,13 @@ if (typeof define === "function" && define.amd) {
 }
 
 // Define as a global zxing variable, saving the original zxing to restore later if needed.
-if (typeof window !== "undefined") {
-    expose();
+if (window !== undefined) {
+    var oldZxing = window.zxing;
+
+    zxing.noConflict = function () {
+        window.zxing = oldZxing;
+        return this;
+    };
+
+    window.zxing = zxing;
 }

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ZXingJS2 Spec Runner</title>
+    <link rel="stylesheet" type="text/css" href="../node_modules/mocha/mocha.css">
+</head>
+<body>
+
+<div id="mocha"></div>
+<script src="../node_modules/expect.js/index.js"></script>
+<script src="../node_modules/mocha/mocha.js"></script>
+<script src="../node_modules/happen/happen.js"></script>
+<script src="sinon-1.17.3.js"></script>
+
+<!-- source files -->
+<script src="../build/deps.js"></script>
+<script>
+    // Load source files.
+    var head = document.getElementsByTagName("head")[0],
+        loading = 0,
+        loaded = 0,
+        docReady = false,
+        PREFIX = "../src/",
+        sources, i;
+
+    for (var key in deps) {
+        sources = deps[key].src;
+        for (i = 0; i < sources.length; i += 1) {
+            loadScript(sources[i]);
+        }
+    }
+
+    function loadScript(src) {
+        var script = document.createElement("script");
+        script.onload = scriptLoaded;
+        loading += 1;
+        script.src = PREFIX + src;
+        head.appendChild(script);
+    }
+
+    function scriptLoaded() {
+        loaded += 1;
+        checkSourcesReady();
+    }
+
+    function checkSourcesReady() {
+        if (docReady && loading === loaded) {
+            (window.mochaPhantomJS || window.mocha).run();
+        }
+    }
+</script>
+
+<script>
+    mocha.setup('bdd');
+    mocha.ignoreLeaks();
+</script>
+
+<!-- spec files -->
+
+<!--<script type="text/javascript" src="suites/SpecHelper.js"></script>-->
+
+<script>
+    docReady = true;
+    checkSourcesReady();
+</script>
+
+</body>
+</html>
