@@ -11,7 +11,8 @@
  */
 
 var build = require('./build/build.js'),
-    version = require('./src/zxing.js').version;
+    version = require('./src/zxing.js').version,
+    copyrightYear = require("./src/copyrightYear.js");
 
 function hint(msg, args) {
     return function () {
@@ -32,7 +33,7 @@ task('build', {async: true}, function (compsBase32, buildName) {
     var v;
 
     jake.exec('git log -1 --pretty=format:"%h"', {breakOnError: false}, function () {
-        build.build(complete, v, compsBase32, buildName);
+        build.build(complete, v, copyrightYear, compsBase32, buildName);
 
     }).on('stdout', function (data) {
         v = version + ' (' + data.toString() + ')';
@@ -43,7 +44,7 @@ task('build', {async: true}, function (compsBase32, buildName) {
 
 desc('Test');
 task('test', ['lint'], {async: true}, function () {
-    //build.test(complete);
+    build.test(complete);
     complete();
 });
 

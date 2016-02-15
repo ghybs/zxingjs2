@@ -1,6 +1,7 @@
-var deps = {
+var deps = [
 
-    core: {
+    {
+        name: "core",
         src: [
             'zxing.js',
             'core/util.js',
@@ -12,8 +13,8 @@ var deps = {
         ],
         desc: 'The core of the library.'
     },
-
-    oneD: {
+    {
+        name: "oneD",
         src: [
             "oneD/oneD.js",
             "oneD/codabar.js",
@@ -23,7 +24,7 @@ var deps = {
         heading: "1D"
     }
 
-};
+];
 
 if (typeof exports !== "undefined") {
     exports.deps = deps;

@@ -22,10 +22,10 @@
         loaded = 0,
         docReady = false,
         PREFIX = "../src/",
-        sources, i;
+        sources, i, j;
 
-    for (var key in deps) {
-        sources = deps[key].src;
+    for (j = 0; j < deps.length; j += 1) {
+        sources = deps[j].src;
         for (i = 0; i < sources.length; i += 1) {
             loadScript(sources[i]);
         }
@@ -57,6 +57,13 @@
 </script>
 
 <!-- spec files -->
+<script src="./specSuites.js"></script>
+<script>
+    // Load spec suites files.
+    for (j = 0; j < specSuites.length; j += 1) {
+        loadScript(specSuites[j]);
+    }
+</script>
 
 <!--<script type="text/javascript" src="suites/SpecHelper.js"></script>-->
 

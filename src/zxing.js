@@ -18,7 +18,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 // Define as a global zxing variable, saving the original zxing to restore later if needed.
-if (window !== undefined) {
+if (typeof window !== "undefined") { // Must use typeof to make Jake happy when requiring this file only.
     var oldZxing = window.zxing;
 
     zxing.noConflict = function () {
@@ -28,3 +28,5 @@ if (window !== undefined) {
 
     window.zxing = zxing;
 }
+
+console.log("zjxing test");

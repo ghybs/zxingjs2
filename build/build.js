@@ -1,11 +1,10 @@
 var fs = require('fs'),
+    path = require ("path"),
     UglifyJS = require('uglify-js'),
     zlib = require('zlib'),
     MagicString = require('magic-string'),
 
     deps = require('./deps.js').deps;
-
-var copyrightYear = "2016";
 
 function getFiles(compsBase32) {
     var memo = {},
@@ -17,21 +16,21 @@ function getFiles(compsBase32) {
     }
 
     function addFiles(srcs) {
-        for (var j = 0, len = srcs.length; j < len; j++) {
-            memo[srcs[j]] = true;
+        for (var i = 0, len = srcs.length; i < len; i++) {
+            memo[srcs[i]] = true;
         }
     }
 
-    for (var i in deps) {
+    for (var j = 0; j < deps.length; j++) {
         if (comps) {
             if (parseInt(comps.pop(), 2) === 1) {
-                console.log(' * ' + i);
-                addFiles(deps[i].src);
+                console.log(' * ' + j);
+                addFiles(deps[j].src);
             } else {
-                console.log('   ' + i);
+                console.log('   ' + j);
             }
         } else {
-            addFiles(deps[i].src);
+            addFiles(deps[j].src);
         }
     }
 
@@ -93,7 +92,7 @@ function bytesToKB(bytes) {
     return (bytes / 1024).toFixed(2) + " kB";
 }
 
-exports.build = function (callback, version, compsBase32, buildName) {
+exports.build = function (callback, version, copyrightYear, compsBase32, buildName) {
 
     var files = getFiles(compsBase32);
 
@@ -165,12 +164,93 @@ exports.build = function (callback, version, compsBase32, buildName) {
         }
     });
 };
-/*
+
 exports.test = function(complete, fail) {
+    // Re-generate the list of test images and their corresponding expected result.
+    var RESOURCES = "spec/resources/",
+        targetFilePath = RESOURCES + "results.js",
+        dirs = fs.readdirSync(RESOURCES),
+        d = 0,
+        testImages = {},
+        testImagesNb = 0,
+        oldContent = loadSilently(targetFilePath),
+        dir, files, currentPath, f, imageName, ext, currentTestImagesDir, resultPath, newContent;
+
+    for (; d < dirs.length; d += 1) {
+        dir = dirs[d];
+
+        if (dir === "results.js") { // Skip that file.
+            continue;
+        }
+
+        currentPath = RESOURCES + dir + "/";
+        testImages[dir] = currentTestImagesDir = {};
+        files = fs.readdirSync(currentPath);
+
+        for (f = 0; f < files.length; f += 1) {
+            imageName = files[f];
+            ext = path.extname(imageName);
+            if (ext === ".png" || ext === ".PNG") {
+                // Look for the corresponding TXT file that contains the expected result.
+                resultPath = currentPath + imageName.replace(ext, ".txt");
+                try {
+                    fs.accessSync(resultPath, fs.R_OK);
+                    currentTestImagesDir[imageName] = fs.readFileSync(resultPath, "utf8");
+                    testImagesNb += 1;
+                } catch (e) {
+                    // It is not readable.
+                    resultPath = currentPath + imageName.replace(ext, ".TXT");
+                    try {
+                        fs.accessSync(resultPath, fs.R_OK);
+                        currentTestImagesDir[imageName] = fs.readFileSync(resultPath, "utf8");
+                        testImagesNb += 1;
+                    } catch (e) {
+                        // It is not readable.
+                    }
+                }
+            }
+        }
+    }
+
+    newContent = "var expectedResults = " + JSON.stringify(testImages, null, 4) + ";\n";
+    if (newContent === oldContent) {
+        console.log("No change in " + testImagesNb + " test image(s).");
+    } else {
+        fs.writeFileSync(targetFilePath, newContent);
+        console.log("Listed " + testImagesNb + " test image(s).");
+    }
+
+
+    // Re-generate the list of spec suites for the manual test index.html file.
+    var SUITES = "spec/suites/",
+        specSuites = [];
+
+    targetFilePath = "spec/specSuites.js";
+    oldContent = loadSilently(targetFilePath);
+    testImagesNb = 0;
+    files = fs.readdirSync(SUITES);
+    for (f = 0; f < files.length; f += 1) {
+        specSuites.push("../" + SUITES + files[f]);
+        testImagesNb += 1;
+    }
+    newContent = "var specSuites = " + JSON.stringify(specSuites, null, 4) + ";\n";
+    if (newContent === oldContent) {
+        console.log("No change in " + testImagesNb + " spec suite(s).");
+    } else {
+        fs.writeFileSync(targetFilePath, newContent);
+        console.log("Listed " + testImagesNb + " spec suite(s).");
+    }
+
+
+    // Start the test configuration.
     var karma = require('karma'),
         testConfig = {configFile : __dirname + '/../spec/karma.conf.js'};
 
-    testConfig.browsers = ['PhantomJS'];
+    //testConfig.browsers = ['PhantomJS'];
+    testConfig.browsers = ['wa'];
+    //testConfig.browsers = [__dirname +  "../node_modules/phantomjs-prebuilt/phantomjs"];
+
+    //testConfig = require(__dirname + '/../spec/karma.conf.js');
 
     function isArgv(optName) {
         return process.argv.indexOf(optName) !== -1;
@@ -191,7 +271,7 @@ exports.test = function(complete, fail) {
 
     if (isArgv('--cov')) {
         testConfig.preprocessors = {
-            'src/** /*.js': 'coverage' // CAUTION!!!
+            'src/**/*.js': 'coverage'
         };
         testConfig.coverageReporter = {
             type : 'html',
@@ -203,13 +283,17 @@ exports.test = function(complete, fail) {
     console.log('Running tests...');
 
     var server = new karma.Server(testConfig, function(exitCode) {
+        console.log('Karma has exited with ' + exitCode);
         if (!exitCode) {
             console.log('\tTests ran successfully.\n');
             complete();
         } else {
+            console.log('\tERROR\n');
             process.exit(exitCode);
         }
     });
+    console.log('server start ' + typeof server.start);
     server.start();
+    console.log('server end');
 };
-*/
+
