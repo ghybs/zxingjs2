@@ -230,7 +230,7 @@ exports.test = function(complete, fail) {
     testImagesNb = 0;
     files = fs.readdirSync(SUITES);
     for (f = 0; f < files.length; f += 1) {
-        specSuites.push("../" + SUITES + files[f]);
+        specSuites.push("suites/" + files[f]);
         testImagesNb += 1;
     }
     newContent = "var specSuites = " + JSON.stringify(specSuites, null, 4) + ";\n";
@@ -246,11 +246,7 @@ exports.test = function(complete, fail) {
     var karma = require('karma'),
         testConfig = {configFile : __dirname + '/../spec/karma.conf.js'};
 
-    //testConfig.browsers = ['PhantomJS'];
-    testConfig.browsers = ['wa'];
-    //testConfig.browsers = [__dirname +  "../node_modules/phantomjs-prebuilt/phantomjs"];
-
-    //testConfig = require(__dirname + '/../spec/karma.conf.js');
+    testConfig.browsers = ['PhantomJS'];
 
     function isArgv(optName) {
         return process.argv.indexOf(optName) !== -1;
@@ -283,17 +279,13 @@ exports.test = function(complete, fail) {
     console.log('Running tests...');
 
     var server = new karma.Server(testConfig, function(exitCode) {
-        console.log('Karma has exited with ' + exitCode);
         if (!exitCode) {
             console.log('\tTests ran successfully.\n');
             complete();
         } else {
-            console.log('\tERROR\n');
             process.exit(exitCode);
         }
     });
-    console.log('server start ' + typeof server.start);
     server.start();
-    console.log('server end');
 };
 

@@ -25,6 +25,7 @@ zxing.util.extendPrototype(zxing.BitArray, {
     },
 
     clear: function () {
+        //this._bitGroups.fill(0);
         var groups = this._bitGroups;
 
         for (var i = 0; i < groups.length; i += 1) {

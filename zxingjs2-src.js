@@ -63,7 +63,7 @@ zxing = {
 
 zxing.oneDReader = {
     statics: {
-        SCAN_LINES_NB: 15
+        scanLinesNb: 15
     },
 
     _decode: function (imageData) {
@@ -73,7 +73,7 @@ zxing.oneDReader = {
             width = imageData.width,
             height = imageData.height,
             rowNumber = Math.round(height / 2),
-            scanLinesNb = this.statics.SCAN_LINES_NB,
+            scanLinesNb = this.statics.scanLinesNb,
             rowStep = Math.ceil(height / scanLinesNb / 2),
             i = 0,
             isAbove = false,

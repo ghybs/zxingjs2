@@ -4,29 +4,29 @@ module.exports = function (config) {
 	var libSources = require(__dirname + '/../build/build.js').getFiles();
 
 	var files = [
-		"spec/sinon-1.17.3.js"
+		"spec/sinon-1.17.3.js",
+        "node_modules/expect.js/index.js"
 	].concat(libSources, [
 		"node_modules/happen/happen.js",
         "spec/resources/results.js",
-		"spec/suites/**/*.js"
+		"spec/suites/**/*.js",
+        {pattern: "spec/resources/**/*.png", included: false}
 	]);
 
     var exclude = [
     ];
-
-	console.log("config karma!" + JSON.stringify(files, null, 4));
 
 	config.set({
 		// base path, that will be used to resolve files and exclude
 		basePath: '../',
 
 		plugins: [
-			require('karma-mocha'),
-			require('karma-coverage'),
-			require('karma-phantomjs-launcher'),
-			require('karma-chrome-launcher'),
-			require('karma-safari-launcher'),
-			require('karma-firefox-launcher')
+			'karma-mocha',
+			'karma-coverage',
+			'karma-phantomjs-launcher',
+			'karma-chrome-launcher',
+			'karma-safari-launcher',
+			'karma-firefox-launcher'
         ],
 
 		// frameworks to use
@@ -35,6 +35,13 @@ module.exports = function (config) {
 		// list of files / patterns to load in the browser
 		files: files,
 		exclude: exclude,
+
+        // To serve images.
+        // See: http://stackoverflow.com/questions/21067710/how-to-fix-404-warnings-for-images-during-karma-unit-testing
+        // and: https://github.com/karma-runner/karma/issues/872
+        proxies: {
+            '/resources/': '/base/spec/resources/'
+        },
 
 		// test results reporter to use
 		// possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -61,9 +68,7 @@ module.exports = function (config) {
 		// - Safari (only Mac)
 		// - PhantomJS
 		// - IE (only Windows)
-		//browsers: ['PhantomJS'],
-        browsers: ['test'],
-        //browsers: [__dirname +  "../node_modules/phantomjs-prebuilt/phantomjs"],
+		browsers: ['PhantomJS'],
 
 
         // If browser does not capture in given timeout [ms], kill it
@@ -77,6 +82,4 @@ module.exports = function (config) {
 		// if true, it capture browsers, run tests and exit
 		singleRun: true
 	});
-
-    console.log("config karma done!");
 };

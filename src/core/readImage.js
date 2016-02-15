@@ -2,7 +2,8 @@ zxing.readImage = function (image, options) {
 
     options = options || {};
 
-    var canvas = options.canvas || document.createElement("canvas");
+    var canvas = options.canvas || document.createElement("canvas"),
+        w, h;
 
     if (typeof image === "string") {
         image = document.getElementById(image);
@@ -18,8 +19,11 @@ zxing.readImage = function (image, options) {
         throw new Error("options.canvas must be an HTMLCanvasElement or a string corresponding to the id of that canvas.");
     }
 
-    canvas.width = image.width;
-    canvas.height = image.height;
+    w = canvas.width = image.width;
+    h = canvas.height = image.height;
+
+    var context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0, w, h);
 
     return zxing.read(canvas, options);
 

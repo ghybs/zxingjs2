@@ -45,7 +45,6 @@ task('build', {async: true}, function (compsBase32, buildName) {
 desc('Test');
 task('test', ['lint'], {async: true}, function () {
     build.test(complete);
-    complete();
 });
 
 task('default', ["test", 'build']);

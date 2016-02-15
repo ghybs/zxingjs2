@@ -16,37 +16,33 @@
 <!-- source files -->
 <script src="../build/deps.js"></script>
 <script>
-    // Load source files.
+    // Load source files in the specified order.
     var head = document.getElementsByTagName("head")[0],
-        loading = 0,
-        loaded = 0,
-        docReady = false,
         PREFIX = "../src/",
-        sources, i, j;
+        sources = [],
+        j;
 
     for (j = 0; j < deps.length; j += 1) {
-        sources = deps[j].src;
-        for (i = 0; i < sources.length; i += 1) {
-            loadScript(sources[i]);
-        }
+        sources = sources.concat(deps[j].src.map(function (item) {
+            return PREFIX + item;
+        }));
     }
 
-    function loadScript(src) {
-        var script = document.createElement("script");
-        script.onload = scriptLoaded;
-        loading += 1;
-        script.src = PREFIX + src;
-        head.appendChild(script);
-    }
+    function loadScripts(srcArray, callback) {
+        var i = 0,
+            iMax = srcArray.length;
 
-    function scriptLoaded() {
-        loaded += 1;
-        checkSourcesReady();
-    }
+        loadScript();
 
-    function checkSourcesReady() {
-        if (docReady && loading === loaded) {
-            (window.mochaPhantomJS || window.mocha).run();
+        function loadScript() {
+            if (i >= iMax) {
+                return callback();
+            }
+            var script = document.createElement("script");
+            script.onload = loadScript;
+            script.src = srcArray[i];
+            i += 1;
+            head.appendChild(script);
         }
     }
 </script>
@@ -57,19 +53,15 @@
 </script>
 
 <!-- spec files -->
-<script src="./specSuites.js"></script>
+<script src="resources/results.js"></script>
+<script src="specSuites.js"></script>
 <script>
     // Load spec suites files.
-    for (j = 0; j < specSuites.length; j += 1) {
-        loadScript(specSuites[j]);
-    }
-</script>
+    sources = sources.concat(specSuites);
 
-<!--<script type="text/javascript" src="suites/SpecHelper.js"></script>-->
-
-<script>
-    docReady = true;
-    checkSourcesReady();
+    loadScripts(sources, function () {
+        (window.mochaPhantomJS || window.mocha).run();
+    });
 </script>
 
 </body>

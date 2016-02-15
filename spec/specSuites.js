@@ -1,3 +1,3 @@
 var specSuites = [
-    "../spec/suites/codabarRead.js"
+    "suites/codabarReadSpec.js"
 ];

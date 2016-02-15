@@ -28,5 +28,3 @@ if (typeof window !== "undefined") { // Must use typeof to make Jake happy when 
 
     window.zxing = zxing;
 }
-
-console.log("zjxing test");

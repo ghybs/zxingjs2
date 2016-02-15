@@ -1,7 +1,9 @@
 zxing.rgbLuminance = {
 
     init: function (pixelsNb) {
-        this.pixelsLuminance = new Uint8Array(pixelsNb);
+        if (this.pixelsLuminance === undefined || pixelsNb > this.pixelsLuminance.length) {
+            this.pixelsLuminance = new Uint8Array(pixelsNb);
+        } // No need to clear data.
 
         return this;
     },

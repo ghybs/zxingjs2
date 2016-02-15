@@ -5,9 +5,11 @@ zxing.globalHistogramBinarizer = {
     LUMINANCE_BUCKETS_NB: 1 << 5, // 1 << LUMINANCE_BITS
     BW_SEPARATION_THRESHOLD: 2,
 
-    init: function () {
+    init: function () { // No need to re-init.
         // Luminance histogram buckets are Uint32, i.e. they can count up to 2**32 - 1 = 4,294,967,295.
-        this._luminanceBuckets = new Uint32Array(this.LUMINANCE_BUCKETS_NB);
+        if (this._luminanceBuckets === undefined) {
+            this._luminanceBuckets = new Uint32Array(this.LUMINANCE_BUCKETS_NB);
+        } // No need to clear data.
 
         return this;
     },
@@ -76,7 +78,8 @@ zxing.globalHistogramBinarizer = {
             pixel;
 
         // Clear histogram buckets.
-        for (; x < this.LUMINANCE_BUCKETS_NB; x += 1) {
+        //buckets.fill(0);
+        for (; x < buckets.length; x += 1) {
             buckets[x] = 0;
         }
 

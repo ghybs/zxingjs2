@@ -28,10 +28,16 @@ zxing.oneD.codabar.reader = {
 
     init: function () {
         // Keep some instance variables to avoid re-allocations.
-        this._counters = new Uint16Array(80);
+        if (this._counters === undefined) {
+            this._counters = new Uint16Array(80); // Initial guess on max number of B/W transitions.
+        } // No need to clear data.
+        if (this._maxs === undefined) {
+            this._maxs = new Float32Array(4);
+        } // No need to clear data.
+        if (this._mins === undefined) {
+            this._mins = new Float32Array(4);
+        } // No need to clear data.
         this._counterLength = 0;
-        this._maxs = new Float32Array(4);
-        this._mins = new Float32Array(4);
 
         return this;
     },
