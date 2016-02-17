@@ -24,6 +24,7 @@ zxing.util.extendPrototype(zxing.BitArray, {
         return (this._bitGroups[group] & mask) !== 0;
     },
 
+
     clear: function () {
         //this._bitGroups.fill(0);
         var groups = this._bitGroups;

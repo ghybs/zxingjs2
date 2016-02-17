@@ -28,8 +28,6 @@ zxing.read = function (canvas, options) {
 
 zxing._read = function (canvas, options) {
 
-    console.log(options);
-
     var optionsDefault = {
         scanLinesNb: 15,
         format: zxing.oneD.codabar.reader
@@ -48,7 +46,7 @@ zxing._read = function (canvas, options) {
         decodeRow3 = reader.decodeRow.bind(reader),
         oneD = zxing.oneD.init(width),
         bitRow = oneD.bwBits,
-        rgbLuminance = zxing.rgbLuminance.init(),
+        rgbLuminance = zxing.rgbLuminance.init(width),
         pixelsLuminance = rgbLuminance.pixelsLuminance,
         binarizer = zxing.globalHistogramBinarizer.init(),
         imageData = canvas.getContext("2d").getImageData(0, 0, width, height),
@@ -64,10 +62,9 @@ zxing._read = function (canvas, options) {
         }
         start = rowNumber * width * 4;
         stop = start + width * 4;
-        console.log("start: " + start + " / stop: " + stop);
 
         // Analyze line (row).
-        rgbLuminance.init(width);
+        rgbLuminance.init();
         rgbLuminance.getLuminance(start, stop, imageData);
 
         binarizer._fillHistogramBuckets(width, pixelsLuminance);
@@ -76,19 +73,11 @@ zxing._read = function (canvas, options) {
         oneD.init();
         binarizer._getBWRow(width, bwThreshold, pixelsLuminance, bitRow);
 
-        var test = bwThreshold + ": ";
-        for (var k = 0; k < width; k += 1) {
-            test += bitRow.getBit(k) ? "#" : " ";
-        }
-        console.log(test);
-
         reader.init();
         result = decodeRow3(bitRow);
         if (result !== -1) {
-            console.log("Found " + result.text + " after iteration " + i);
             return result;
         }
-        console.log("Not found at iteration " + i);
     }
 
     return result;

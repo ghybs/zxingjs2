@@ -1,8 +1,8 @@
 zxing.globalHistogramBinarizer = {
 
-    LUMINANCE_BITS: 5,
-    LUMINANCE_SHIFT: 8 - 5, // Uint8's size - LUMINANCE_BITS
-    LUMINANCE_BUCKETS_NB: 1 << 5, // 1 << LUMINANCE_BITS
+    LUMINANCE_BITS: 5, // 2**5 = 32 different values of luminance.
+    LUMINANCE_SHIFT: 8 - 5, // Uint8's size - LUMINANCE_BITS.
+    LUMINANCE_BUCKETS_NB: 1 << 5, // 1 << LUMINANCE_BITS.
     BW_SEPARATION_THRESHOLD: 2,
 
     init: function () { // No need to re-init.

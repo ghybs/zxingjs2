@@ -7,42 +7,31 @@ describe("codabar reader", function () {
 
     });
 
-    function checkTestsNb(done) {
-        testsDone += 1;
-
-        if (testsDone === testsNb) {
-            console.log("Reached " + testsDone);
-            done();
-        }
+    function generateTestImageFunction(imageName) {
+        return function (done) {
+            var img = document.createElement("img");
+            img.name = imageName;
+            img.result = tests[imageName];
+            img.onload = function () {
+                var result = zxing.readImage(this);
+                expect(result).to.be.an("object");
+                expect(result.text).to.equal(this.result);
+                done();
+            };
+            img.src = PATH + imageName;
+        };
     }
 
     var tests = expectedResults["codabar-1"],
         PATH = "resources/codabar-1/",
-        imageNames = Object.keys(tests),
-        testsNb = imageNames.length,
-        testsDone = 0,
         imageName, img;
 
     if (tests) {
 
-        it ("decodes all " + testsNb + " test images", function (done) {
+        for (imageName in tests) {
 
-            for (imageName in tests) {
-                img = document.createElement("img");
-                img.name = imageName;
-                img.result = tests[imageName];
-                img.onload = function () {
-                    var result = zxing.readImage(this);
-                    expect(result).to.be.an("object");
-                    expect(result.text).to.equal(this.result);
-                    console.log("Found " + result.text + ", expected: " + this.result);
-                    checkTestsNb(done);
-                };
-                img.src = PATH + imageName;
-                document.body.appendChild(img);
-            }
-
-        });
+            it ("decodes test image `" + imageName + "`", generateTestImageFunction(imageName));
+        }
     }
 
 });
