@@ -1,5 +1,9 @@
-zxing.read = function (canvas, options) {
+zxing.DEFAULT_READ_OPTIONS = {
+    scanLinesNb: 15,
+    format: zxing.oneD.codabar.reader
+};
 
+zxing.checkOptions = function (canvas, options) {
     options = options || {};
 
     if (typeof canvas === "string") {
@@ -22,18 +26,18 @@ zxing.read = function (canvas, options) {
         options.height = canvas.height;
     }
 
+    return zxing.util.extend({}, zxing.DEFAULT_READ_OPTIONS, options);
+};
+
+zxing.read = function (canvas, options) {
+
+    options = zxing.checkOptions(canvas, options);
+
     return zxing._read(canvas, options);
 
 };
 
 zxing._read = function (canvas, options) {
-
-    var optionsDefault = {
-        scanLinesNb: 15,
-        format: zxing.oneD.codabar.reader
-    };
-
-    options = zxing.util.extend({}, optionsDefault, options);
 
     var width = options.width,
         height = options.height,
