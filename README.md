@@ -4,6 +4,14 @@ Yet another port to JavaScript of [ZXing](https://github.com/zxing/zxing) multi-
 Many 1D and/or 2D code image processing libraries exist.
 
 
+## == Disclaimer ==
+
+**This library is far from being fully functional now.
+Unfortunately I do not plan to work further on it for the time being.
+Please feel free to re-use the work and extend it.
+You can open issues to mention your extended work.**
+
+
 
 ## Rationale
 
